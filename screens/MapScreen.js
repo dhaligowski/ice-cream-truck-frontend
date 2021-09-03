@@ -135,7 +135,7 @@ function MapScreen({ navigation }) {
 
       ws.current.onopen = () => {
         ws.current.onmessage = (e) => {
-          console.log("parseEdata", JSON.parse(e.data));
+          // console.log("parseEdata", JSON.parse(e.data));
           if (JSON.parse(e.data) === false) {
             alert(
               //if driver is already in, exit
