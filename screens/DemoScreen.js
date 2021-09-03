@@ -22,6 +22,7 @@ let ZOOM = { zoomValue: 16 };
 function MapScreen(props) {
   const mapRef = useRef(null);
   const progress = useRef(new Animated.Value(0)).current;
+  const timerRef = useRef(null);
   const toggleAnimation = useRef(false);
 
   const coordinate = useRef(
@@ -37,16 +38,40 @@ function MapScreen(props) {
 
   useEffect(() => {
     let i = 0;
+    // console.log("HEREEE");
+    // for (let i = 0; i < demoRoute.length; i++) {
+    //   // console.log("i", i);
+    //   const timer = setTimeout(() => {
+    //     console.log("I", i);
+    //     cameraAnimate(i);
+    //     animateMarker(demoRoute[i]);
+    //     setAddress(demoRoute[i]);
+    //     handleShakeLocationAnimation();
+    //   }, 1500 + i * 1500);
+    //   clearTimeout(timer);
+    // }
+    // return () => {
+    //   clearTimeout(timer);
+    // };
     const interval = setInterval(() => {
-      cameraAnimate(i);
-      animateMarker(demoRoute[i]);
-      setAddress(demoRoute[i]);
-      handleShakeLocationAnimation();
+      console.log("i", i);
+      runRoute(i);
+      // cameraAnimate(i);
+      // animateMarker(demoRoute[i]);
+      // setAddress(demoRoute[i]);
+      // handleShakeLocationAnimation();
       i++;
       if (i >= demoRoute.length) i = 0;
     }, 1500);
     return () => clearInterval(interval);
   }, []);
+
+  const runRoute = (i) => {
+    cameraAnimate(i);
+    animateMarker(demoRoute[i]);
+    setAddress(demoRoute[i]);
+    handleShakeLocationAnimation();
+  };
 
   const animateMarker = (coords) => {
     const newCoordinate = {
@@ -164,6 +189,7 @@ function MapScreen(props) {
           showsMyLocationButton={true}
           style={styles.map}
           // onRegionChangeComplete={(e) => handleUserMoveMap(e)}
+          onMapReady={() => mapRef}
           provider={MapView.PROVIDER_GOOGLE}
         >
           {coordinate.current ? (
@@ -243,29 +269,28 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 16,
   },
-  button: { width: "70%" },
   road: {
     justifyContent: "flex-start",
     top: "-10%",
     right: "37.5%",
   },
-  zoomIn: {
-    position: "absolute",
-    top: "65%",
-    right: "10%",
-    elevation: 12,
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: "#1B8381",
-  },
-  zoomOut: {
-    position: "absolute",
-    top: "75%",
-    right: "10%",
-    elevation: 12,
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: "#1B8381",
-  },
+  // zoomIn: {
+  //   position: "absolute",
+  //   top: "65%",
+  //   right: "10%",
+  //   elevation: 12,
+  //   borderRadius: 25,
+  //   borderWidth: 1,
+  //   borderColor: "#1B8381",
+  // },
+  // zoomOut: {
+  //   position: "absolute",
+  //   top: "75%",
+  //   right: "10%",
+  //   elevation: 12,
+  //   borderRadius: 25,
+  //   borderWidth: 1,
+  //   borderColor: "#1B8381",
+  // },
 });
 export default MapScreen;

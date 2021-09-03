@@ -138,6 +138,7 @@ function CustomerScreen({ onLogin, navigation }) {
           style={styles.map}
           // onRegionChangeComplete={(e) => handleUserMoveMap(e)}
           provider={MapView.PROVIDER_GOOGLE}
+          // onMapReady={() => mapRef}
         >
           {location ? (
             <Marker

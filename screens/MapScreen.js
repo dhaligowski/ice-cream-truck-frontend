@@ -45,18 +45,47 @@ function MapScreen({ navigation }) {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         setErrorMsg("Permission to access location was denied", errorMsg);
-        alert("Please allow user-location permissions.");
+        alert("Please allow user-location permissions1.");
+        let webSocket = new WebSocket(apiURL);
+        ws.current = webSocket;
         setUser(null);
         return;
       }
-      let location;
+
+      // current issue with getCurrentPositionAsync() not working so the
+      // try/catch with getLastKnownPositionAsync() is a work around until
+      // it is working..
+      //Another solution is to add {accuracy:1} as option
+      //https://github.com/expo/expo/issues/9377
+      //https://github.com/expo/expo/issues/5504
+
+      // let location;
+
+      // try {
+      //   location = await Location.getCurrentPositionAsync({
+      //     accuracy: Location.Accuracy.BestForNavigation,
+      //     LocationActivityType: Location.ActivityType.OtherNavigation,
+      //     maximumAge: 5000,
+      //     timeout: 15000,
+      //   });
+      // } catch {
+      //   location = await Location.getLastKnownPositionAsync({
+      //     accuracy: Location.Accuracy.BestForNavigation,
+      //     LocationActivityType: Location.ActivityType.OtherNavigation,
+      //     maxAge: 5000,
+      //     timeout: 15000,
+      //   });
+      // }
+
       // let location = await Location.getCurrentPositionAsync({});
+      let location;
       try {
-        location = await Location.getCurrentPositionAsync({});
+        location = await Location.getCurrentPositionAsync({ accuracy: 1 });
       } catch (error) {
-        alert("Please allow user-location permissions.");
+        alert("Please allow user-location permissions2.");
+        let webSocket = new WebSocket(apiURL);
+        ws.current = webSocket;
         setUser(null);
-        console.log("past null setuser");
         return;
       }
 
@@ -101,10 +130,11 @@ function MapScreen({ navigation }) {
 
       ws.current.onopen = () => {
         ws.current.onmessage = (e) => {
+          console.log("parseEdata", JSON.parse(e.data));
           if (JSON.parse(e.data) === false) {
             alert(
               //if driver is already in, exit
-              "A driver is already signed in, please log in as a customer or select demo."
+              "A driver is already signed in, or you have been logged out as a driver after 10 minutes."
             );
             navigation.navigate("ChooseLoginType");
           }
@@ -138,7 +168,7 @@ function MapScreen({ navigation }) {
 
       return currentPosition.remove;
     })();
-
+    // if (ws.current !== null)
     return () => ws.current.close();
   }, []);
 
@@ -287,6 +317,7 @@ function MapScreen({ navigation }) {
           rotateEnabled={false}
           showsMyLocationButton={true}
           style={styles.map}
+          // onMapReady={() => mapRef}
           // onRegionChangeComplete={(e) => handleUserMoveMap(e)}
           provider={MapView.PROVIDER_GOOGLE}
         >
