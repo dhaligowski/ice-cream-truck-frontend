@@ -80,7 +80,12 @@ function MapScreen({ navigation }) {
       // let location = await Location.getCurrentPositionAsync({});
       let location;
       try {
-        location = await Location.getCurrentPositionAsync({ accuracy: 1 });
+        location = await Location.getLastKnownPositionAsync({
+          //temp fix..
+          accuracy: Location.Accuracy.BestForNavigation,
+          LocationActivityType: Location.ActivityType.OtherNavigation,
+        });
+        // location = await Location.getCurrentPositionAsync({ accuracy: 1 });
       } catch (error) {
         alert("Please allow user-location permissions2.");
         let webSocket = new WebSocket(apiURL);
