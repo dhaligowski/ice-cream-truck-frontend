@@ -18,6 +18,7 @@ import LottiLocation from "../components/LottiLocation";
 
 const delta = 0.005;
 let ZOOM = { zoomValue: 16 };
+Route_Speed = 1500;
 
 function MapScreen(props) {
   const mapRef = useRef(null);
@@ -38,40 +39,19 @@ function MapScreen(props) {
 
   useEffect(() => {
     let i = 0;
-    // console.log("HEREEE");
-    // for (let i = 0; i < demoRoute.length; i++) {
-    //   // console.log("i", i);
-    //   const timer = setTimeout(() => {
-    //     console.log("I", i);
-    //     cameraAnimate(i);
-    //     animateMarker(demoRoute[i]);
-    //     setAddress(demoRoute[i]);
-    //     handleShakeLocationAnimation();
-    //   }, 1500 + i * 1500);
-    //   clearTimeout(timer);
-    // }
-    // return () => {
-    //   clearTimeout(timer);
-    // };
-    const interval = setInterval(() => {
-      console.log("i", i);
-      runRoute(i);
-      // cameraAnimate(i);
-      // animateMarker(demoRoute[i]);
-      // setAddress(demoRoute[i]);
-      // handleShakeLocationAnimation();
-      i++;
-      if (i >= demoRoute.length) i = 0;
-    }, 1500);
-    return () => clearInterval(interval);
-  }, []);
 
-  const runRoute = (i) => {
-    cameraAnimate(i);
-    animateMarker(demoRoute[i]);
-    setAddress(demoRoute[i]);
-    handleShakeLocationAnimation();
-  };
+    if (mapRef.current !== null) {
+      let interval = setInterval(() => {
+        cameraAnimate(i);
+        animateMarker(demoRoute[i]);
+        setAddress(demoRoute[i]);
+        handleShakeLocationAnimation();
+        i++;
+        if (i >= demoRoute.length) i = 0;
+      }, Route_Speed);
+      return () => clearInterval(interval);
+    }
+  }, [mapRef.current]);
 
   const animateMarker = (coords) => {
     const newCoordinate = {
@@ -189,7 +169,7 @@ function MapScreen(props) {
           showsMyLocationButton={true}
           style={styles.map}
           // onRegionChangeComplete={(e) => handleUserMoveMap(e)}
-          onMapReady={() => mapRef}
+          onMapReady={() => mapRef.current}
           provider={MapView.PROVIDER_GOOGLE}
         >
           {coordinate.current ? (
