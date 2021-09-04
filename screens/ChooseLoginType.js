@@ -4,6 +4,7 @@ import { View, StyleSheet, StatusBar, Platform } from "react-native";
 import AppButtonLight from "../components/AppButtonLight";
 import AppButtonDark from "../components/AppButtonDark";
 import AuthContext from "../auth/context";
+import colors from "../config/colors";
 import Logo from "../components/Logo";
 import LottiIceCream from "../components/LottiIceCream";
 import LottiType from "../components/LottiType";
@@ -14,7 +15,7 @@ function ChooseLoginType({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1B8381" />
+      <StatusBar barStyle="light-content" backgroundColor={colors.green} />
       <View style={styles.header}>
         <View style={styles.logo}>
           <Logo />
@@ -62,24 +63,24 @@ function ChooseLoginType({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.white,
   },
 
   header: {
     flex: 0.4,
-    backgroundColor: "#1B8381",
+    backgroundColor: colors.green,
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
   },
   logo: { alignItems: "center", marginTop: -60 },
   headerText: {
-    color: "#ffffff",
+    color: colors.white,
     fontSize: 30,
     fontFamily: Platform.OS === "android" ? "Roboto" : "Avenir",
     fontWeight: "bold",
   },
   bodytext: {
-    color: "#1B8381",
+    color: colors.green,
     fontSize: 30,
     fontFamily: Platform.OS === "android" ? "Roboto" : "Avenir",
     fontWeight: "bold",
@@ -93,7 +94,7 @@ const styles = StyleSheet.create({
     width: "40%",
     marginVertical: 20,
     borderWidth: 3,
-    borderColor: "#1B8381",
+    borderColor: colors.green,
     borderRadius: 25,
   },
   driverButtonLg: {

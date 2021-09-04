@@ -2,6 +2,8 @@ import React from "react";
 import { View, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
+import colors from "../config/colors";
+
 function ZoomOutIcon({ onZoomOut }) {
   return (
     <View style={styles.container}>
@@ -9,7 +11,7 @@ function ZoomOutIcon({ onZoomOut }) {
         <MaterialIcons
           name="remove-circle"
           color="#000000"
-          color="#1B8381"
+          color={colors.green}
           size={35}
         />
       </TouchableOpacity>

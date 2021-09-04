@@ -1,6 +1,8 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
+import colors from "../config/colors";
+
 function AppButtonDark({ title, onPress }) {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
@@ -11,14 +13,14 @@ function AppButtonDark({ title, onPress }) {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "#1B8381",
+    backgroundColor: colors.green,
     borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
     padding: 7,
   },
   text: {
-    color: "#ffffff",
+    color: colors.white,
     fontSize: 20,
     textTransform: "uppercase",
   },

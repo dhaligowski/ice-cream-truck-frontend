@@ -11,6 +11,7 @@ import MapView, { Marker } from "react-native-maps";
 
 import apiURL from "../config/api";
 import AuthContext from "../auth/context";
+import colors from "../config/colors";
 import LogoutButton from "../components/LogoutButton";
 import LottiLocation from "../components/LottiLocation";
 import ZoomInIcon from "../components/ZoomInIcon";
@@ -98,7 +99,7 @@ function CustomerScreen({ onLogin, navigation }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1B8381" />
+      <StatusBar barStyle="light-content" backgroundColor={colors.green} />
       <View style={styles.header}>
         <View style={styles.lottiContainer}>
           <View style={styles.lotti}>
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    backgroundColor: "#1B8381",
+    backgroundColor: colors.green,
   },
   addressContainer: { width: "75%" },
   lottiContainer: {
@@ -180,11 +181,11 @@ const styles = StyleSheet.create({
     height: "100%",
     width: "20%",
   },
-  addressText: { color: "#ffffff", fontSize: 24, fontWeight: "bold" },
+  addressText: { color: colors.white, fontSize: 24, fontWeight: "bold" },
   header: {
     height: "15%",
     width: "100%",
-    backgroundColor: "#1B8381",
+    backgroundColor: colors.green,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     justifyContent: "center",
@@ -193,7 +194,7 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   container3: {
-    backgroundColor: "#1B8381",
+    backgroundColor: colors.green,
     flex: 1,
     width: "100%",
     justifyContent: "space-evenly",
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
   body: {
     height: "50%",
     width: "90%",
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.white,
     borderRadius: 25,
     elevation: 20,
   },
@@ -236,7 +237,7 @@ const styles = StyleSheet.create({
     elevation: 12,
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: "#1B8381",
+    borderColor: colors.green,
   },
   zoomOut: {
     position: "absolute",
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
     elevation: 12,
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: "#1B8381",
+    borderColor: colors.green,
   },
 });
 export default CustomerScreen;

@@ -1,6 +1,8 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
+import colors from "../config/colors";
+
 function AppButtonLight({ title, onPress }) {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
@@ -16,10 +18,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 4,
-    borderColor: "#1B8381",
+    borderColor: colors.green,
   },
   text: {
-    color: "#1B8381",
+    color: colors.green,
     fontSize: 20,
     textTransform: "uppercase",
   },

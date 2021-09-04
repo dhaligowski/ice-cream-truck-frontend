@@ -1,6 +1,8 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
+import colors from "../config/colors";
+
 function LogoutButton({ title, onPress }) {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
@@ -11,14 +13,14 @@ function LogoutButton({ title, onPress }) {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "#1B8381",
+    backgroundColor: colors.green,
     borderRadius: 25,
     padding: 7,
     elevation: 12,
   },
   text: {
-    color: "#1B8381",
-    color: "#ffffff",
+    color: colors.green,
+    color: colors.white,
     fontSize: 20,
     textTransform: "uppercase",
   },
