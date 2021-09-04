@@ -1,4 +1,4 @@
-//Helper screen to test markers and map
+//Helper screen to test markers and map and get GPS coords for demo routes
 import React, { useRef } from "react";
 import {
   StyleSheet,
