@@ -37,7 +37,7 @@ function CustomerScreen({ onLogin, navigation }) {
       ws.current.onmessage = (e) => {
         if (JSON.parse(e.data) === false) {
           alert(
-            "No driver currently signed in, please log in as a driver or select demo."
+            "No driver currently logged in, please log in as a driver or select demo."
           ); //alert and exit if no dirver exists
           navigation.navigate("ChooseLoginType");
         }
