@@ -9,12 +9,14 @@ import {
 } from "react-native";
 import MapView, { AnimatedRegion, Marker } from "react-native-maps";
 import * as Location from "expo-location";
+
+import apiURL from "../config/api";
+import AuthContext from "../auth/context";
+import colors from "../config/colors";
+import LogoutButton from "../components/LogoutButton";
+import LottiLocation from "../components/LottiLocation";
 import ZoomInIcon from "../components/ZoomInIcon";
 import ZoomOutIcon from "../components/ZoomOutIcon";
-import LottiLocation from "../components/LottiLocation";
-import LogoutButton from "../components/LogoutButton";
-import AuthContext from "../auth/context";
-import apiURL from "../config/api";
 
 const delta = 0.005;
 let ZOOM = { zoomValue: 16 };
@@ -43,9 +45,12 @@ function MapScreen({ navigation }) {
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
+
       if (status !== "granted") {
         setErrorMsg("Permission to access location was denied", errorMsg);
-        alert("Please allow user-location permissions1.");
+        alert(
+          "Please turn on location services and grant permission-101.  Clear the Expo data and cache if issues persist."
+        );
         let webSocket = new WebSocket(apiURL);
         ws.current = webSocket;
         setUser(null);
@@ -79,6 +84,7 @@ function MapScreen({ navigation }) {
 
       // let location = await Location.getCurrentPositionAsync({});
       let location;
+
       try {
         location = await Location.getLastKnownPositionAsync({
           //temp fix..
@@ -87,13 +93,24 @@ function MapScreen({ navigation }) {
         });
         // location = await Location.getCurrentPositionAsync({ accuracy: 1 });
       } catch (error) {
-        alert("Please allow user-location permissions2.");
+        alert(
+          "Please turn on location services and grant permission-102.  Clear the Expo data and cache if issues persist."
+        );
         let webSocket = new WebSocket(apiURL);
         ws.current = webSocket;
         setUser(null);
         return;
       }
-
+      if (!location) {
+        alert(
+          "Please turn on location services and grant permission-103.  Clear the Expo data and cache if issues persist."
+        );
+        let webSocket = new WebSocket(apiURL);
+        ws.current = webSocket;
+        setUser(null);
+        return;
+      }
+      console.log(location);
       setCamera({
         center: {
           latitude: location.coords.latitude,
@@ -139,7 +156,7 @@ function MapScreen({ navigation }) {
           if (JSON.parse(e.data) === false) {
             alert(
               //if driver is already in, exit
-              "A driver is already signed in, or you have been logged out as a driver after 10 minutes."
+              "Error: A driver is already logged in, or you have exceeded the 10 minute limit imposed on drivers. Thanks."
             );
             navigation.navigate("ChooseLoginType");
           }
@@ -289,7 +306,7 @@ function MapScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1B8381" />
+      <StatusBar barStyle="light-content" backgroundColor={colors.green} />
 
       <View style={styles.header}>
         <View style={styles.lottiContainer}>
@@ -355,7 +372,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    backgroundColor: "#1B8381",
+    backgroundColor: colors.green,
   },
   addressContainer: { width: "75%" },
   lottiContainer: {
@@ -366,11 +383,11 @@ const styles = StyleSheet.create({
     height: "100%",
     width: "20%",
   },
-  addressText: { color: "#ffffff", fontSize: 24, fontWeight: "bold" },
+  addressText: { color: colors.white, fontSize: 24, fontWeight: "bold" },
   header: {
     height: "15%",
     width: "100%",
-    backgroundColor: "#1B8381",
+    backgroundColor: colors.green,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     justifyContent: "center",
@@ -379,7 +396,7 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   container3: {
-    backgroundColor: "#1B8381",
+    backgroundColor: colors.green,
     flex: 1,
     width: "100%",
     justifyContent: "space-evenly",
@@ -397,7 +414,7 @@ const styles = StyleSheet.create({
   body: {
     height: "50%",
     width: "90%",
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.white,
     borderRadius: 25,
     elevation: 20,
   },
@@ -422,7 +439,7 @@ const styles = StyleSheet.create({
     elevation: 12,
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: "#1B8381",
+    borderColor: colors.green,
   },
   zoomOut: {
     position: "absolute",
@@ -431,7 +448,7 @@ const styles = StyleSheet.create({
     elevation: 12,
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: "#1B8381",
+    borderColor: colors.green,
   },
 });
 export default MapScreen;
