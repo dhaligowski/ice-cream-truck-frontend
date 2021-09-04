@@ -1,17 +1,16 @@
 //Helper screen to test markers and map and get GPS coords for demo routes
 import React, { useRef } from "react";
 import {
-  StyleSheet,
-  View,
-  Text,
   Dimensions,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
 } from "react-native";
 
 import MapView, { Marker, AnimatedRegion } from "react-native-maps";
 
 const screen = Dimensions.get("window");
-
 const ASPECT_RATIO = screen.width / screen.height;
 const LATITUDE = 37.78825;
 const LONGITUDE = -122.4324;
