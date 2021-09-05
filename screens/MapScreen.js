@@ -86,12 +86,13 @@ function MapScreen({ navigation }) {
       let location;
 
       try {
-        location = await Location.getLastKnownPositionAsync({
-          //temp fix..
-          accuracy: Location.Accuracy.BestForNavigation,
-          LocationActivityType: Location.ActivityType.OtherNavigation,
-        });
-        // location = await Location.getCurrentPositionAsync({ accuracy: 1 });
+        // location = await Location.getLastKnownPositionAsync({
+        //   //temp fix..
+        //   accuracy: Location.Accuracy.BestForNavigation,
+        //   LocationActivityType: Location.ActivityType.OtherNavigation,
+        // });
+        //location = await Location.getCurrentPositionAsync({ accuracy: 1 });
+        location = await Location.getCurrentPositionAsync({ accuracy: 1 });
       } catch (error) {
         alert(
           "Please turn on location services and grant permission-102.  Clear the Expo data and cache if issues persist."
