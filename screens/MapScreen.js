@@ -94,13 +94,21 @@ function MapScreen({ navigation }) {
         //location = await Location.getCurrentPositionAsync({ accuracy: 1 });
         location = await Location.getCurrentPositionAsync({ accuracy: 1 });
       } catch (error) {
-        alert(
-          "Please turn on location services and grant permission-102.  Clear the Expo data and cache if issues persist."
-        );
-        let webSocket = new WebSocket(apiURL);
-        ws.current = webSocket;
-        setUser(null);
-        return;
+        if (
+          error.message ==
+          "Location provider is unavailable. Make sure that location services are enabled."
+        ) {
+          // call the function again function
+          location = await Location.getLastKnownPositionAsync({});
+        }
+
+        // alert(
+        //   "Please turn on location services and grant permission-102.  Clear the Expo data and cache if issues persist."
+        // );
+        // let webSocket = new WebSocket(apiURL);
+        // ws.current = webSocket;
+        // setUser(null);
+        // return;
       }
       if (!location) {
         alert(
@@ -111,7 +119,6 @@ function MapScreen({ navigation }) {
         setUser(null);
         return;
       }
-      console.log(location);
       setCamera({
         center: {
           latitude: location.coords.latitude,
