@@ -6,6 +6,7 @@ import {
   StatusBar,
   Animated,
   Image,
+  Button,
 } from "react-native";
 import MapView, { AnimatedRegion, Marker } from "react-native-maps";
 
@@ -14,52 +15,70 @@ import colors from "../config/colors";
 import demoRoute from "../data/demoRoute";
 import LogoutButton from "../components/LogoutButton";
 import LottiLocation from "../components/LottiLocation";
-// import ZoomInIcon from "../components/ZoomInIcon";
-// import ZoomOutIcon from "../components/ZoomOutIcon";
+import ZoomInIcon from "../components/ZoomInIcon";
+import ZoomOutIcon from "../components/ZoomOutIcon";
 
-const delta = 0.005;
+import standard from "../mapstyles/standard.json";
+import aubergine from "../mapstyles/aubergine.json";
+import dark from "../mapstyles/dark.json";
+import retro from "../mapstyles/retro.json";
+import night from "../mapstyles/night.json";
+
+const DELTA = 0.005;
 let ZOOM = { zoomValue: 16 };
 Route_Speed = 1500;
 
 function MapScreen(props) {
+  const index = useRef(0);
+  const [mapKey, setMapKey] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
   const mapRef = useRef(null);
+
+  const [mapStyle, setMapStyle] = useState({
+    style: standard,
+    name: "Standard",
+  });
+
   const progress = useRef(new Animated.Value(0)).current;
-  const timerRef = useRef(null);
   const toggleAnimation = useRef(false);
 
   const coordinate = useRef(
     new AnimatedRegion({
-      latitude: 37.7896963150624,
-      longitude: -122.39012774080038,
-      latitudeDelta: delta,
-      longitudeDelta: delta,
+      latitude: demoRoute[0].latitude,
+      longitude: demoRoute[0].longitude,
+      latitudeDelta: DELTA,
+      longitudeDelta: DELTA,
     })
   );
   const { setUser } = useContext(AuthContext);
   const [address, setAddress] = useState(null);
 
   useEffect(() => {
+    if (!isLoaded) return;
     let i = 0;
+    let interval;
 
-    if (mapRef.current !== null) {
-      let interval = setInterval(() => {
-        cameraAnimate(i);
-        animateMarker(demoRoute[i]);
-        setAddress(demoRoute[i]);
+    let timer = setTimeout(() => {
+      interval = setInterval(() => {
+        cameraAnimate(index.current);
+        animateMarker(demoRoute[index.current]);
+        setAddress(demoRoute[index.current]);
         handleShakeLocationAnimation();
-        i++;
-        if (i >= demoRoute.length) i = 0;
+        index.current++;
+        if (index.current >= demoRoute.length) {
+          index.current = 0;
+        }
       }, Route_Speed);
-      return () => clearInterval(interval);
-    }
-  }, [mapRef.current]);
+    }, 2000);
+    return () => (clearInterval(interval), clearTimeout(timer));
+  }, [isLoaded]);
 
   const animateMarker = (coords) => {
     const newCoordinate = {
       latitude: coords.latitude,
       longitude: coords.longitude,
     };
-    coordinate.current.timing(newCoordinate, 3000).start();
+    coordinate.current.timing(newCoordinate).start();
   };
 
   const cameraAnimate = (i) => {
@@ -84,7 +103,7 @@ function MapScreen(props) {
     ZOOM.zoomValue += 0.5;
     mapRef.current.animateCamera(
       {
-        center: { latitude: address.latitude, longitude: address.longitude },
+        // center: { latitude: address.latitude, longitude: address.longitude },
         pitch: 0,
         heading: 0,
         // Only on iOS MapKit, in meters. The property is ignored by Google Maps.
@@ -95,6 +114,7 @@ function MapScreen(props) {
       { duration: 500 }
     );
   };
+
   const animateZoomOut = () => {
     ZOOM.zoomValue -= 0.5;
     mapRef.current.animateCamera(
@@ -111,9 +131,25 @@ function MapScreen(props) {
     );
   };
 
-  // const handleUserMoveMap = (e) => {
-  //   console.log("e", e);
-  // };
+  const handleMode = () => {
+    if (mapStyle.style === standard) {
+      setMapStyle({ style: night, name: "Night" });
+    }
+    if (mapStyle.style === night) {
+      setMapStyle({ style: dark, name: "Dark" });
+    }
+    if (mapStyle.style === dark) {
+      setMapStyle({ style: retro, name: "Retro" });
+    }
+    if (mapStyle.style === retro) {
+      setMapStyle({ style: aubergine, name: "Aubergine" });
+    }
+    if (mapStyle.style === aubergine) {
+      setMapStyle({ style: standard, name: "Standard" });
+    }
+
+    setMapKey(!mapKey);
+  };
 
   const handleShakeLocationAnimation = () => {
     const animationValue = toggleAnimation.current ? 0 : 1;
@@ -128,6 +164,9 @@ function MapScreen(props) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.green} />
+      <View style={styles.mapstyleButton}>
+        <LogoutButton title={mapStyle.name} onPress={handleMode} />
+      </View>
       <View style={styles.header}>
         <View style={styles.lottiContainer}>
           <View style={styles.lotti}>
@@ -149,14 +188,14 @@ function MapScreen(props) {
       </View>
       <View style={styles.mapContainer}>
         <MapView
-          //   scrollEnabled={false}
+          scrollEnabled={true}
           loadingEnabled={false}
-          //   zoomEnabled={false}
+          zoomEnabled={true}
           ref={mapRef}
-          camera={{
+          initialCamera={{
             center: {
-              latitude: demoRoute[0].latitude,
-              longitude: demoRoute[0].longitude,
+              latitude: demoRoute[index.current].latitude,
+              longitude: demoRoute[index.current].longitude,
             },
             pitch: 0,
             heading: 0,
@@ -170,8 +209,11 @@ function MapScreen(props) {
           showsMyLocationButton={true}
           style={styles.map}
           // onRegionChangeComplete={(e) => handleUserMoveMap(e)}
-          onMapReady={() => mapRef.current}
+          // onMapReady={() => mapRef.current}
+          onMapReady={() => setIsLoaded(true)}
           provider={MapView.PROVIDER_GOOGLE}
+          customMapStyle={mapStyle.style}
+          key={mapKey}
         >
           {coordinate.current ? (
             <Marker.Animated
@@ -179,7 +221,6 @@ function MapScreen(props) {
               title={"NorthSide Ice Cream"}
               description={"Ice Cream and Treats!"}
               image={require("../assets/north-side.png")}
-              style={styles.cone}
             />
           ) : null}
         </MapView>
@@ -187,6 +228,12 @@ function MapScreen(props) {
 
       <View style={styles.logoutButton}>
         <LogoutButton title="Logout" onPress={() => setUser(null)} />
+      </View>
+      <View style={styles.zoomIn}>
+        <ZoomInIcon onZoomIn={animateZoomIn} />
+      </View>
+      <View style={styles.zoomOut}>
+        <ZoomOutIcon onZoomOut={animateZoomOut} />
       </View>
     </View>
   );
@@ -245,6 +292,13 @@ const styles = StyleSheet.create({
   logoutButton: {
     position: "absolute",
     top: "90%",
+    left: "65%",
+  },
+  mapstyleButton: {
+    position: "absolute",
+    top: "25%",
+    left: "65%",
+    zIndex: 1,
   },
   text: {
     textAlign: "center",
@@ -255,23 +309,23 @@ const styles = StyleSheet.create({
     top: "-10%",
     right: "37.5%",
   },
-  // zoomIn: {
-  //   position: "absolute",
-  //   top: "65%",
-  //   right: "10%",
-  //   elevation: 12,
-  //   borderRadius: 25,
-  //   borderWidth: 1, colors.green
-  //   borderColor: ,
-  // },
-  // zoomOut: {
-  //   position: "absolute",
-  //   top: "75%",
-  //   right: "10%",
-  //   elevation: 12,
-  //   borderRadius: 25,
-  //   borderWidth: 1,
-  //   borderColor:  colors.green,
-  // },
+  zoomIn: {
+    position: "absolute",
+    top: "65%",
+    right: "10%",
+    elevation: 12,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: colors.green,
+  },
+  zoomOut: {
+    position: "absolute",
+    top: "75%",
+    right: "10%",
+    elevation: 12,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: colors.green,
+  },
 });
 export default MapScreen;
