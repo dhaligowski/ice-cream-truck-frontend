@@ -18,15 +18,26 @@ import LottiLocation from "../components/LottiLocation";
 import ZoomInIcon from "../components/ZoomInIcon";
 import ZoomOutIcon from "../components/ZoomOutIcon";
 
-const delta = 0.005;
+import standard from "../mapstyles/standard.json";
+import aubergine from "../mapstyles/aubergine.json";
+import dark from "../mapstyles/dark.json";
+import retro from "../mapstyles/retro.json";
+import night from "../mapstyles/night.json";
+
+const DELTA = 0.005;
 let ZOOM = { zoomValue: 16 };
+const DISTANCE_INTERVAL = 3;
 
 function MapScreen({ navigation }) {
   const [address, setAddress] = useState([]);
   const [camera, setCamera] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [mapKey, setMapKey] = useState(true);
   const mapRef = useRef(null);
-  const [markerCoords, setMarkerCoords] = useState(null);
+  const [mapStyle, setMapStyle] = useState({
+    style: standard,
+    name: "Standard",
+  });
   const prevAddress = useRef(null);
   const progress = useRef(new Animated.Value(0)).current;
   const toggleAnimation = useRef(false);
@@ -35,10 +46,10 @@ function MapScreen({ navigation }) {
 
   const coordinate = useRef(
     new AnimatedRegion({
-      latitude: 42.884632,
-      longitude: -83.6061515,
-      latitudeDelta: delta,
-      longitudeDelta: delta,
+      latitude: 0,
+      longitude: 0,
+      latitudeDelta: DELTA,
+      longitudeDelta: DELTA,
     })
   );
 
@@ -86,6 +97,7 @@ function MapScreen({ navigation }) {
       let location;
 
       try {
+        // console.log("try");
         // location = await Location.getLastKnownPositionAsync({
         //   //temp fix..
         //   accuracy: Location.Accuracy.BestForNavigation,
@@ -94,10 +106,12 @@ function MapScreen({ navigation }) {
         //location = await Location.getCurrentPositionAsync({ accuracy: 1 });
         location = await Location.getCurrentPositionAsync({ accuracy: 1 });
       } catch (error) {
+        // console.log("error");
         if (
           error.message ==
           "Location provider is unavailable. Make sure that location services are enabled."
         ) {
+          // console.log("if message");
           // call the function again function
           location = await Location.getLastKnownPositionAsync({});
         }
@@ -110,6 +124,7 @@ function MapScreen({ navigation }) {
         // setUser(null);
         // return;
       }
+
       if (!location) {
         alert(
           "Please turn on location services and grant permission-103.  Clear the Expo data and cache if issues persist."
@@ -119,6 +134,7 @@ function MapScreen({ navigation }) {
         setUser(null);
         return;
       }
+
       setCamera({
         center: {
           latitude: location.coords.latitude,
@@ -132,19 +148,12 @@ function MapScreen({ navigation }) {
         zoom: ZOOM.zoomValue,
       });
 
-      setMarkerCoords({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: delta,
-        longitudeDelta: delta,
-      });
-
-      coordinate.current = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: delta,
-        longitudeDelta: delta,
-      };
+      coordinate.current
+        .timing({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        })
+        .start();
 
       let currentAddress = await Location.reverseGeocodeAsync({
         latitude: location.coords.latitude,
@@ -160,7 +169,6 @@ function MapScreen({ navigation }) {
 
       ws.current.onopen = () => {
         ws.current.onmessage = (e) => {
-          // console.log("parseEdata", JSON.parse(e.data));
           if (JSON.parse(e.data) === false) {
             alert(
               //if driver is already in, exit
@@ -191,14 +199,13 @@ function MapScreen({ navigation }) {
       let currentPosition = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.BestForNavigation,
-          distanceInterval: 1,
+          distanceInterval: DISTANCE_INTERVAL,
         },
         (loc) => handleUpdate(loc)
       );
 
       return currentPosition.remove;
     })();
-    // if (ws.current !== null)
     return () => ws.current.close();
   }, []);
 
@@ -220,10 +227,24 @@ function MapScreen({ navigation }) {
       },
       { duration: 1000 }
     );
+    coordinate.current
+      .timing({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      })
+      .start();
 
-    setMarkerCoords({
-      latitude: loc.coords.latitude,
-      longitude: loc.coords.longitude,
+    setCamera({
+      center: {
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      },
+      pitch: 0,
+      heading: 0,
+      // Only on iOS MapKit, in meters. The property is ignored by Google Maps.
+      altitude: ZOOM.zoomValue,
+      // Only when using Google Maps.
+      zoom: ZOOM.zoomValue,
     });
 
     let currentAddress = await Location.reverseGeocodeAsync({
@@ -231,10 +252,11 @@ function MapScreen({ navigation }) {
       longitude: loc.coords.longitude,
     });
 
-    if (prevAddress.current[0].name === currentAddress[0].name) return; //Address not new
-    handleShakeLocationAnimation();
-    prevAddress.current = currentAddress;
-    setAddress(currentAddress);
+    if (prevAddress.current[0].name !== currentAddress[0].name) {
+      handleShakeLocationAnimation();
+      prevAddress.current = currentAddress;
+      setAddress(currentAddress);
+    }
 
     ws.current.send(
       JSON.stringify({
@@ -250,24 +272,13 @@ function MapScreen({ navigation }) {
     );
   };
 
-  // const animateMarker = (coords) => {
-  //   const newCoordinate = {
-  //     latitude: coords.latitude,
-  //     longitude: coords.longitude,
-  //   };
-  //   console.log("newCoord", newCoordinate);
-  //   console.log("coord.current", coordinate.current);
-  //   coordinate.current.timing(newCoordinate).start();
-  //   // markerRef.current.animateMarkerToCoordinate(newCoordinate, 200);//Android only
-  // };
-
   const animateZoomIn = () => {
     ZOOM.zoomValue += 0.5;
     mapRef.current.animateCamera(
       {
         center: {
-          latitude: markerCoords.latitude,
-          longitude: markerCoords.longitude,
+          latitude: camera.center.latitude,
+          longitude: camera.center.longitude,
         },
 
         pitch: 0,
@@ -286,8 +297,8 @@ function MapScreen({ navigation }) {
     mapRef.current.animateCamera(
       {
         center: {
-          latitude: markerCoords.latitude,
-          longitude: markerCoords.longitude,
+          latitude: camera.center.latitude,
+          longitude: camera.center.longitude,
         },
 
         pitch: 0,
@@ -312,10 +323,31 @@ function MapScreen({ navigation }) {
     toggleAnimation.current = !toggleAnimation.current;
   };
 
+  const handleMode = () => {
+    if (mapStyle.style === standard) {
+      setMapStyle({ style: night, name: "Night" });
+    }
+    if (mapStyle.style === night) {
+      setMapStyle({ style: dark, name: "Dark" });
+    }
+    if (mapStyle.style === dark) {
+      setMapStyle({ style: retro, name: "Retro" });
+    }
+    if (mapStyle.style === retro) {
+      setMapStyle({ style: aubergine, name: "Aubergine" });
+    }
+    if (mapStyle.style === aubergine) {
+      setMapStyle({ style: standard, name: "Standard" });
+    }
+
+    setMapKey(!mapKey);
+  };
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.green} />
-
+      <View style={styles.mapstyleButton}>
+        <LogoutButton title={mapStyle.name} onPress={handleMode} />
+      </View>
       <View style={styles.header}>
         <View style={styles.lottiContainer}>
           <View style={styles.lotti}>
@@ -338,11 +370,11 @@ function MapScreen({ navigation }) {
       </View>
       <View style={styles.mapContainer}>
         <MapView
-          scrollEnabled={false}
+          scrollEnabled={true}
           loadingEnabled={false}
-          zoomEnabled={false}
+          zoomEnabled={true}
           ref={mapRef}
-          camera={camera}
+          initialCamera={camera}
           showCompass={true}
           rotateEnabled={false}
           showsMyLocationButton={true}
@@ -350,14 +382,15 @@ function MapScreen({ navigation }) {
           // onMapReady={() => mapRef}
           // onRegionChangeComplete={(e) => handleUserMoveMap(e)}
           provider={MapView.PROVIDER_GOOGLE}
+          customMapStyle={mapStyle.style}
+          key={mapKey}
         >
-          {markerCoords ? (
-            <Marker
-              coordinate={markerCoords}
+          {mapRef ? (
+            <Marker.Animated
+              coordinate={coordinate.current}
               title={"NorthSide Ice Cream"}
               description={"Ice Cream and Treats!"}
               image={require("../assets/north-side.png")}
-              style={styles.cone}
             />
           ) : null}
         </MapView>
@@ -429,6 +462,13 @@ const styles = StyleSheet.create({
   logoutButton: {
     position: "absolute",
     top: "90%",
+    left: "65%",
+  },
+  mapstyleButton: {
+    position: "absolute",
+    top: "25%",
+    left: "65%",
+    zIndex: 1,
   },
   text: {
     textAlign: "center",
