@@ -17,12 +17,14 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     padding: 7,
     elevation: 12,
+    width: 125,
   },
   text: {
     color: colors.green,
     color: colors.white,
     fontSize: 20,
     textTransform: "uppercase",
+    textAlign: "center",
   },
 });
 
