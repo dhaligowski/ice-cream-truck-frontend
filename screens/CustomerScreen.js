@@ -7,7 +7,7 @@ import {
   Animated,
   Image,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, AnimatedRegion } from "react-native-maps";
 
 import apiURL from "../config/api";
 import AuthContext from "../auth/context";
@@ -17,10 +17,23 @@ import LottiLocation from "../components/LottiLocation";
 import ZoomInIcon from "../components/ZoomInIcon";
 import ZoomOutIcon from "../components/ZoomOutIcon";
 
-let ZOOM = { zoomValue: 16 };
+import standard from "../mapstyles/standard.json";
+import aubergine from "../mapstyles/aubergine.json";
+import dark from "../mapstyles/dark.json";
+import retro from "../mapstyles/retro.json";
+import night from "../mapstyles/night.json";
 
-function CustomerScreen({ onLogin, navigation }) {
+let ZOOM = { zoomValue: 16 };
+const DELTA = 0.005;
+
+function CustomerScreen({ navigation }) {
+  const currentLocation = useRef(null);
+  const [mapKey, setMapKey] = useState(true);
   const mapRef = useRef(null);
+  const [mapStyle, setMapStyle] = useState({
+    style: standard,
+    name: "Standard",
+  });
   const progress = useRef(new Animated.Value(0)).current;
   const toggleAnimation = useRef(false);
   const ws = useRef(null);
@@ -28,6 +41,15 @@ function CustomerScreen({ onLogin, navigation }) {
   const [location, setLocation] = useState({
     coords: { latitude: 0, longitude: 0 },
   });
+
+  const coordinate = useRef(
+    new AnimatedRegion({
+      latitude: 0,
+      longitude: 0,
+      latitudeDelta: DELTA,
+      longitudeDelta: DELTA,
+    })
+  );
 
   useEffect(() => {
     let webSocket = new WebSocket(apiURL);
@@ -41,10 +63,41 @@ function CustomerScreen({ onLogin, navigation }) {
           ); //alert and exit if no dirver exists
           navigation.navigate("ChooseLoginType");
         }
+
         if (JSON.parse(e.data) !== true && JSON.parse(e.data) !== false) {
           let updatedLocation = JSON.parse(e.data);
+
           setLocation(updatedLocation);
-          handleShakeLocationAnimation();
+
+          mapRef.current.animateCamera(
+            {
+              center: {
+                latitude: updatedLocation.coords.latitude,
+                longitude: updatedLocation.coords.longitude,
+              },
+              pitch: 0,
+              heading: 0,
+              // Only on iOS MapKit, in meters. The property is ignored by Google Maps.
+              altitude: ZOOM.zoomValue,
+              // Only when using Google Maps.
+              zoom: ZOOM.zoomValue,
+            },
+            { duration: 1000 }
+          );
+
+          coordinate.current
+            .timing({
+              latitude: updatedLocation.coords.latitude,
+              longitude: updatedLocation.coords.longitude,
+            })
+            .start();
+
+          if (
+            currentLocation.current &&
+            currentLocation.current.addressName !== updatedLocation.addressName
+          )
+            handleShakeLocationAnimation();
+          currentLocation.current = updatedLocation;
         }
       };
     };
@@ -97,9 +150,36 @@ function CustomerScreen({ onLogin, navigation }) {
     toggleAnimation.current = !toggleAnimation.current;
   };
 
+  const handleMode = () => {
+    if (mapStyle.style === standard) {
+      setMapStyle({ style: night, name: "Night" });
+    }
+    if (mapStyle.style === night) {
+      setMapStyle({ style: dark, name: "Dark" });
+    }
+    if (mapStyle.style === dark) {
+      setMapStyle({ style: retro, name: "Retro" });
+    }
+    if (mapStyle.style === retro) {
+      setMapStyle({ style: aubergine, name: "Aubergine" });
+    }
+    if (mapStyle.style === aubergine) {
+      setMapStyle({ style: standard, name: "Standard" });
+    }
+
+    setMapKey(!mapKey);
+  };
+
+  // const handleUserMoveMap = (e) => {
+  //   console.log("e", e);
+  // };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.green} />
+      <View style={styles.mapstyleButton}>
+        <LogoutButton title={mapStyle.name} onPress={handleMode} />
+      </View>
       <View style={styles.header}>
         <View style={styles.lottiContainer}>
           <View style={styles.lotti}>
@@ -120,11 +200,11 @@ function CustomerScreen({ onLogin, navigation }) {
       </View>
       <View style={styles.mapContainer}>
         <MapView
-          scrollEnabled={false}
-          loadingEnabled
-          zoomEnabled={false}
+          scrollEnabled={true}
+          loadingEnabled={false}
+          zoomEnabled={true}
           ref={mapRef}
-          camera={{
+          initialCamera={{
             center: location.coords,
             pitch: 0,
             heading: 0,
@@ -140,10 +220,12 @@ function CustomerScreen({ onLogin, navigation }) {
           // onRegionChangeComplete={(e) => handleUserMoveMap(e)}
           provider={MapView.PROVIDER_GOOGLE}
           // onMapReady={() => mapRef}
+          customMapStyle={mapStyle.style}
+          key={mapKey}
         >
-          {location ? (
-            <Marker
-              coordinate={location.coords}
+          {mapRef ? (
+            <Marker.Animated
+              coordinate={coordinate.current}
               title={"NorthSide Ice Cream"}
               description={"Ice Cream and Treats!"}
               image={require("../assets/north-side.png")}
@@ -219,6 +301,13 @@ const styles = StyleSheet.create({
   logoutButton: {
     position: "absolute",
     top: "90%",
+    left: "65%",
+  },
+  mapstyleButton: {
+    position: "absolute",
+    top: "25%",
+    left: "65%",
+    zIndex: 1,
   },
   text: {
     textAlign: "center",
