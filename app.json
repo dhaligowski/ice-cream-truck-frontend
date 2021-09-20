@@ -17,12 +17,21 @@
     "ios": {
       "supportsTablet": true
     },
+    "description": "North-Side ice cream truck",
     "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyASJoSDitJrGd635eHpTbqVvh9vESzxZhM"
+        }
+      },
+      "package": "com.dh.northside",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       }
     },
+
     "web": {
       "favicon": "./assets/favicon.png"
     }
