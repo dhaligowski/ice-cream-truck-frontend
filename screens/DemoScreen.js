@@ -6,9 +6,9 @@ import {
   StatusBar,
   Animated,
   Image,
-  Button,
 } from "react-native";
 import MapView, { AnimatedRegion, Marker } from "react-native-maps";
+import NetInfo from "@react-native-community/netinfo";
 
 import AuthContext from "../auth/context";
 import colors from "../config/colors";
@@ -31,6 +31,7 @@ Route_Speed = 1500;
 function MapScreen(props) {
   const index = useRef(0);
   const [mapKey, setMapKey] = useState(true);
+  const [isConnected, setIsConnected] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const mapRef = useRef(null);
 
@@ -54,7 +55,18 @@ function MapScreen(props) {
   const [address, setAddress] = useState(null);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    NetInfo.fetch().then((state) => {
+      if (!state.isConnected) {
+        alert(
+          "No internet connection detected. Please reconnect and try again."
+        );
+        setUser(null);
+      } else setIsConnected(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isLoaded || !isConnected) return;
     let i = 0;
     let interval;
 
@@ -71,7 +83,7 @@ function MapScreen(props) {
       }, Route_Speed);
     }, 2000);
     return () => (clearInterval(interval), clearTimeout(timer));
-  }, [isLoaded]);
+  }, [isLoaded, isConnected]);
 
   const animateMarker = (coords) => {
     const newCoordinate = {

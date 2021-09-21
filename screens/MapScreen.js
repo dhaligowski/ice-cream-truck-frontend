@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import MapView, { AnimatedRegion, Marker } from "react-native-maps";
 import * as Location from "expo-location";
+import NetInfo from "@react-native-community/netinfo";
 
 import apiURL from "../config/api";
 import AuthContext from "../auth/context";
@@ -32,6 +33,8 @@ function MapScreen({ navigation }) {
   const [address, setAddress] = useState([]);
   const [camera, setCamera] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+
   const [mapKey, setMapKey] = useState(true);
   const mapRef = useRef(null);
   const [mapStyle, setMapStyle] = useState({
@@ -54,6 +57,18 @@ function MapScreen({ navigation }) {
   );
 
   useEffect(() => {
+    NetInfo.fetch().then((state) => {
+      if (!state.isConnected) {
+        alert(
+          "No internet connection detected. Please reconnect and try again."
+        );
+        setUser(null);
+      } else setIsConnected(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isConnected) return;
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
 
@@ -207,7 +222,7 @@ function MapScreen({ navigation }) {
       return currentPosition.remove;
     })();
     return () => ws.current.close();
-  }, []);
+  }, [isConnected]);
 
   const handleUpdate = async (loc) => {
     if (mapRef.current === null) return; //exits if logout or app put in background

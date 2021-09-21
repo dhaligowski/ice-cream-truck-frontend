@@ -8,6 +8,7 @@ import {
   Image,
 } from "react-native";
 import MapView, { Marker, AnimatedRegion } from "react-native-maps";
+import NetInfo from "@react-native-community/netinfo";
 
 import apiURL from "../config/api";
 import AuthContext from "../auth/context";
@@ -28,6 +29,7 @@ const DELTA = 0.005;
 
 function CustomerScreen({ navigation }) {
   const currentLocation = useRef(null);
+  const [isConnected, setIsConnected] = useState(false);
   const [mapKey, setMapKey] = useState(true);
   const mapRef = useRef(null);
   const [mapStyle, setMapStyle] = useState({
@@ -52,6 +54,18 @@ function CustomerScreen({ navigation }) {
   );
 
   useEffect(() => {
+    NetInfo.fetch().then((state) => {
+      if (!state.isConnected) {
+        alert(
+          "No internet connection detected. Please reconnect and try again."
+        );
+        setUser(null);
+      } else setIsConnected(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isConnected) return;
     let webSocket = new WebSocket(apiURL);
     ws.current = webSocket;
 
@@ -106,7 +120,7 @@ function CustomerScreen({ navigation }) {
       console.log("connection closed", e.code, e.reason);
     };
     return () => ws.current.close();
-  }, []);
+  }, [isConnected]);
 
   const animateZoomIn = () => {
     ZOOM.zoomValue += 0.5;
