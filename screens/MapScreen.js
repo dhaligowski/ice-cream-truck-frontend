@@ -75,7 +75,7 @@ function MapScreen({ navigation }) {
       if (status !== "granted") {
         setErrorMsg("Permission to access location was denied", errorMsg);
         alert(
-          "Please turn on location services and grant permission-101.  Clear the Expo data and cache if issues persist."
+          "Please turn on location services and grant permission-101.  Clear app cache and data if issues persist."
         );
         let webSocket = new WebSocket(apiURL);
         ws.current = webSocket;
@@ -119,7 +119,7 @@ function MapScreen({ navigation }) {
         //   LocationActivityType: Location.ActivityType.OtherNavigation,
         // });
         //location = await Location.getCurrentPositionAsync({ accuracy: 1 });
-        location = await Location.getCurrentPositionAsync({ accuracy: 1 });
+        location = await Location.getCurrentPositionAsync({ accuracy: 6 });
       } catch (error) {
         // console.log("error");
         if (
@@ -142,7 +142,7 @@ function MapScreen({ navigation }) {
 
       if (!location) {
         alert(
-          "Please turn on location services and grant permission-103.  Clear the Expo data and cache if issues persist."
+          "Please turn on location services and grant permission-103.  Clear app cache and data if issues persist."
         );
         let webSocket = new WebSocket(apiURL);
         ws.current = webSocket;
