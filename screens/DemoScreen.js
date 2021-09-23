@@ -131,11 +131,11 @@ function MapScreen(props) {
     ZOOM.zoomValue -= 0.5;
     mapRef.current.animateCamera(
       {
-        center: { latitude: address.latitude, longitude: address.longitude },
+        // center: { latitude: address.latitude, longitude: address.longitude },
         pitch: 0,
         heading: 0,
         // Only on iOS MapKit, in meters. The property is ignored by Google Maps.
-        altitude: 25,
+        altitude: ZOOM.zoomValue,
         // Only when using Google Maps.
         zoom: ZOOM.zoomValue,
       },
