@@ -28,6 +28,7 @@ import night from "../mapstyles/night.json";
 const DELTA = 0.005;
 let ZOOM = { zoomValue: 16 };
 const DISTANCE_INTERVAL = 3;
+//const TIME_INTERVAL = 2000;
 
 function MapScreen({ navigation }) {
   const [address, setAddress] = useState([]);
@@ -119,7 +120,7 @@ function MapScreen({ navigation }) {
         //   LocationActivityType: Location.ActivityType.OtherNavigation,
         // });
         //location = await Location.getCurrentPositionAsync({ accuracy: 1 });
-        location = await Location.getCurrentPositionAsync({ accuracy: 6 });
+        location = await Location.getCurrentPositionAsync({ accuracy: 5 });
       } catch (error) {
         // console.log("error");
         if (
@@ -213,8 +214,10 @@ function MapScreen({ navigation }) {
 
       let currentPosition = await Location.watchPositionAsync(
         {
-          accuracy: Location.Accuracy.BestForNavigation,
+          accuracy: Location.Accuracy.Highest,
+          //accuracy: Location.Accuracy.BestForNavigation,
           distanceInterval: DISTANCE_INTERVAL,
+          //timeInterval: TIME_INTERVAL,
         },
         (loc) => handleUpdate(loc)
       );
