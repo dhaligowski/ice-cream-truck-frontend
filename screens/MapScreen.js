@@ -27,7 +27,7 @@ import night from "../mapstyles/night.json";
 
 const DELTA = 0.005;
 let ZOOM = { zoomValue: 16 };
-const DISTANCE_INTERVAL = 3;
+const DISTANCE_INTERVAL = 1;
 //const TIME_INTERVAL = 2000;
 
 function MapScreen({ navigation }) {
@@ -113,7 +113,6 @@ function MapScreen({ navigation }) {
       let location;
 
       try {
-        // console.log("try");
         // location = await Location.getLastKnownPositionAsync({
         //   //temp fix..
         //   accuracy: Location.Accuracy.BestForNavigation,
@@ -122,12 +121,10 @@ function MapScreen({ navigation }) {
         //location = await Location.getCurrentPositionAsync({ accuracy: 1 });
         location = await Location.getCurrentPositionAsync({ accuracy: 5 });
       } catch (error) {
-        // console.log("error");
         if (
           error.message ==
           "Location provider is unavailable. Make sure that location services are enabled."
         ) {
-          // console.log("if message");
           // call the function again function
           location = await Location.getLastKnownPositionAsync({});
         }
