@@ -21,11 +21,11 @@
     "android": {
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyASJoSDitJrGd635eHpTbqVvh9vESzxZhM"
+          "apiKey": "AIzaSyCI1_YwtQ6D6IEyQPoc3eqvjE2ZqmtpZKA"
         }
       },
       "package": "com.dh.northside",
-      "versionCode": 1,
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
